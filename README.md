@@ -133,8 +133,7 @@ A modern, full-stack invoice generation application built with React and Node.js
 
 ## Live Demo
 
-- **Frontend**: [https://invoice-generator-react.vercel.app](https://invoice-generator-react.vercel.app)
-- **Backend API**: [https://invoice-generator-api.onrender.com](https://invoice-generator-api.onrender.com)
+-[[ https://invoice-genrator-aczk.vercel.app]]
 
 ## Contributing
 

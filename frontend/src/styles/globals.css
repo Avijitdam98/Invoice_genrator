@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --secondary: #64748b;
+  --background: #ffffff;
+  --text: #0f172a;
+  --border: #e2e8f0;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+.dark {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --secondary: #94a3b8;
+  --background: #0f172a;
+  --text: #f8fafc;
+  --border: #334155;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+/* Responsive Layout Classes */
+.responsive-container {
+  @apply container mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.responsive-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 transition-all duration-200;
+}
+
+/* Button Styles */
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-primary-dark text-white;
+}
+
+.btn-secondary {
+  @apply bg-secondary hover:bg-secondary/80 text-white;
+}
+
+/* Form Controls */
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+         focus:outline-none focus:ring-2 focus:ring-primary
+         dark:bg-gray-700 dark:text-white;
+}
+
+/* Drag and Drop Styles */
+.draggable {
+  @apply cursor-move;
+}
+
+.droppable {
+  @apply border-2 border-dashed border-gray-300 dark:border-gray-600 
+         rounded-lg p-4 transition-colors duration-200;
+}
+
+.droppable.active {
+  @apply border-primary;
+}
+
+/* Responsive Typography */
+@layer base {
+  h1 {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold;
+  }
+  h2 {
+    @apply text-xl sm:text-2xl lg:text-3xl font-semibold;
+  }
+  h3 {
+    @apply text-lg sm:text-xl lg:text-2xl font-semibold;
+  }
+}
+
+/* Animation Classes */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}

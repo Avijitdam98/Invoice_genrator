@@ -13,10 +13,8 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CORS_ORIGIN 
-    : ['http://localhost:3000', 'http://localhost:5173'],
-  credentials: true,
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'https://invoice-genrator-aczk.vercel.app'],
+  credentials: true
 };
 
 app.use(cors(corsOptions));

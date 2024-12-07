@@ -78,6 +78,35 @@ cd frontend
 npm run dev
 ```
 
+## Deployment
+
+### Backend Deployment (Render)
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Configure the following:
+   - Build Command: `npm install`
+   - Start Command: `node server.js`
+   - Environment Variables:
+     ```
+     PORT=5000
+     MONGODB_URI=your_mongodb_uri
+     JWT_SECRET=your_jwt_secret
+     NODE_ENV=production
+     CORS_ORIGIN=https://your-frontend-url.vercel.app
+     ```
+
+### Frontend Deployment (Vercel)
+
+1. Create a new project on Vercel
+2. Connect your GitHub repository
+3. Configure the following environment variables:
+   ```
+   REACT_APP_API_URL=https://your-backend-url.onrender.com/api
+   REACT_APP_ENV=production
+   ```
+4. Deploy!
+
 ## Features in Detail
 
 ### Invoice Management
@@ -98,6 +127,11 @@ npm run dev
 - Dark mode support
 - Intuitive interface
 - Real-time updates
+
+## Live Demo
+
+Frontend: [https://invoice-generator-react.vercel.app](https://invoice-generator-react.vercel.app)
+Backend API: [https://invoice-generator-api.onrender.com](https://invoice-generator-api.onrender.com)
 
 ## Contributing
 

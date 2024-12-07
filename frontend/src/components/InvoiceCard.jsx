@@ -1,65 +1,53 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  HiDocumentText, 
-  HiCurrencyRupee, 
-  HiCalendar, 
-  HiUser,
-  HiPencil,
-  HiPrinter,
-  HiTrash
-} from 'react-icons/hi';
-import { format } from 'date-fns';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { toast } from 'react-hot-toast';
+import { invoiceApi } from '../services/api';
+import { HiPrinter, HiPencil, HiTrash } from 'react-icons/hi';
 
-const InvoiceCard = ({ invoice, onSelect, isSelected, onDelete }) => {
+const InvoiceCard = ({ invoice, onDelete, isSelected, onSelect }) => {
   const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const statusColors = {
-    paid: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    unpaid: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    overdue: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+  const handleEdit = () => {
+    navigate(`/invoices/edit/${invoice._id}`);
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 25
-      }
-    },
-    hover: {
-      y: -5,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 25
+  const handlePrint = () => {
+    navigate(`/invoices/print/${invoice._id}`);
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this invoice?')) {
+      try {
+        setIsDeleting(true);
+        await invoiceApi.deleteInvoice(invoice._id);
+        toast.success('Invoice deleted successfully');
+        onDelete(invoice._id);
+      } catch (error) {
+        console.error('Error deleting invoice:', error);
+        toast.error('Failed to delete invoice');
+      } finally {
+        setIsDeleting(false);
       }
     }
   };
 
-  const buttonVariants = {
-    hover: { 
-      scale: 1.1,
-      transition: { type: "spring", stiffness: 400, damping: 10 }
-    },
-    tap: { scale: 0.9 }
+  // Calculate totals from items
+  const calculateTotals = () => {
+    if (!invoice.items || !Array.isArray(invoice.items)) {
+      return { subtotal: 0, gstAmount: 0, taxAmount: 0, totalAmount: 0 };
+    }
+
+    const subtotal = invoice.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const gstAmount = invoice.items.reduce((sum, item) => sum + ((item.quantity * item.price) * item.gstRate / 100), 0);
+    const taxAmount = invoice.items.reduce((sum, item) => sum + ((item.quantity * item.price) * item.taxRate / 100), 0);
+    const totalAmount = subtotal + gstAmount + taxAmount;
+
+    return { subtotal, gstAmount, taxAmount, totalAmount };
   };
 
-  const iconVariants = {
-    hover: {
-      scale: 1.1,
-      rotate: 5,
-      transition: {
-        duration: 0.2,
-        ease: "easeInOut"
-      }
-    }
-  };
+  const totals = calculateTotals();
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -68,151 +56,93 @@ const InvoiceCard = ({ invoice, onSelect, isSelected, onDelete }) => {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No due date';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid date';
-      return date.toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid date';
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'paid':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'unpaid':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'overdue':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
     }
   };
 
-  const getStatus = (invoice) => {
-    if (invoice.status?.toLowerCase() === 'paid') return 'paid';
-    if (invoice.status?.toLowerCase() === 'unpaid') return 'unpaid';
-    if (!invoice.dueDate) return 'unpaid';
-    
-    const now = new Date();
-    const dueDate = new Date(invoice.dueDate);
-    
-    if (isNaN(dueDate.getTime())) return 'unpaid';
-    return now > dueDate ? 'overdue' : 'unpaid';
-  };
-
-  const status = getStatus(invoice);
-
-  if (!invoice) return null;
-
   return (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      className="bg-white dark:bg-gray-800 rounded-xl p-6 cursor-pointer border border-gray-200 dark:border-gray-700"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <motion.div
-            variants={iconVariants}
-            className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg"
-          >
-            <HiDocumentText className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          </motion.div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              #{invoice._id?.slice(-6) || 'No ID'}
-            </h3>
-            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-              <HiUser className="w-4 h-4 mr-1" />
-              {invoice.clientName || 'No Client Name'}
-            </div>
-          </div>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow relative ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+      {/* Selection Checkbox */}
+      <div className="absolute top-4 left-4">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={onSelect}
+          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:focus:ring-blue-600"
+        />
+      </div>
+
+      <div className="flex justify-between items-start mb-4 pl-8">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {invoice.clientName}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Invoice #{invoice._id.slice(-6)}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {format(new Date(invoice.createdAt), 'MMM dd, yyyy')}
+          </p>
+          <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-2 ${getStatusColor(invoice.status)}`}>
+            {invoice.status || 'Pending'}
+          </span>
         </div>
-        <div className="flex items-center space-x-3">
-          <motion.input
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => onSelect(invoice._id)}
-            className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer"
-          />
-          <motion.span
-            whileHover={{ scale: 1.05 }}
-            className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[status]}`}
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </motion.span>
+        <div className="text-right">
+          <p className="text-lg font-bold text-gray-900 dark:text-white">
+            {formatCurrency(totals.totalAmount)}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            GST: {formatCurrency(totals.gstAmount)}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Tax: {formatCurrency(totals.taxAmount)}
+          </p>
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="flex items-center text-gray-700 dark:text-gray-300">
-          <HiCurrencyRupee className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
-          <div>
-            <p className="text-sm font-medium">Amount</p>
-            <p className="text-lg font-semibold">{formatCurrency(invoice.total || invoice.totalAmount || 0)}</p>
-          </div>
-        </div>
-        <div className="flex items-center text-gray-700 dark:text-gray-300">
-          <HiCalendar className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
-          <div>
-            <p className="text-sm font-medium">Due Date</p>
-            <p className="text-base">
-              {formatDate(invoice.dueDate)}
+      <div className="border-t dark:border-gray-700 pt-4 mt-4">
+        <div className="flex justify-between items-center">
+          <div className="text-sm">
+            <p className="text-gray-600 dark:text-gray-400">
+              {invoice.items?.length || 0} items
             </p>
           </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handlePrint}
+              className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
+              title="View PDF"
+            >
+              <HiPrinter className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleEdit}
+              className="p-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-full transition-colors"
+              title="Edit Invoice"
+            >
+              <HiPencil className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Delete Invoice"
+            >
+              <HiTrash className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
-
-      <motion.div
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="mt-4 h-1 bg-indigo-100 dark:bg-indigo-900/30 rounded-full overflow-hidden"
-      >
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ 
-            width: status === 'paid' ? '100%' : 
-                   status === 'unpaid' ? '50%' : '75%'
-          }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="h-full bg-indigo-600 dark:bg-indigo-400 rounded-full"
-        />
-      </motion.div>
-
-      <div className="flex justify-end space-x-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          onClick={() => navigate(`/edit-invoice/${invoice._id}`)}
-          className="p-2 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-          title="Edit Invoice"
-        >
-          <HiPencil className="h-5 w-5" />
-        </motion.button>
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          onClick={() => navigate(`/invoice/print/${invoice._id}`)}
-          className="p-2 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
-          title="Print Invoice"
-        >
-          <HiPrinter className="h-5 w-5" />
-        </motion.button>
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          onClick={() => onDelete(invoice._id)}
-          className="p-2 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-          title="Delete Invoice"
-        >
-          <HiTrash className="h-5 w-5" />
-        </motion.button>
-      </div>
-    </motion.div>
+    </div>
   );
 };
 

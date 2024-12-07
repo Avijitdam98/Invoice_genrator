@@ -1,0 +1,36 @@
+@media print {
+  /* Hide everything except the invoice content */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the invoice content */
+  .print-content,
+  .print-content * {
+    visibility: visible;
+  }
+
+  /* Position the invoice at the top of the page */
+  .print-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Remove background colors and shadows for better printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ensure page breaks don't occur in the middle of items */
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Add page margins */
+  @page {
+    margin: 2cm;
+  }
+}

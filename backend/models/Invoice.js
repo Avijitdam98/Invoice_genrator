@@ -6,16 +6,20 @@ const InvoiceSchema = new mongoose.Schema({
     type: String,
     required: true, // Ensures clientName is provided
   },
-  services: [
+  items: [
     {
       description: { type: String, required: true },
-      amount: { type: Number, required: true },
+      quantity: { type: Number, required: true },
+      price: { type: Number, required: true },
+      gstRate: { type: Number, default: 18 }, // GST rate in percentage
+      taxRate: { type: Number, default: 5 },  // Additional tax rate in percentage
+      amount: { type: Number, required: true }
     },
   ],
-  total: {
-    type: Number,
-    required: true, // Ensures total is provided
-  },
+  subtotal: { type: Number, required: true },
+  gstAmount: { type: Number, required: true },
+  taxAmount: { type: Number, required: true },
+  totalAmount: { type: Number, required: true },
   currency: {
     type: String,
     enum: ["INR", "USD", "EUR", "GBP"],

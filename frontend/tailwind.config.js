@@ -89,16 +89,34 @@ export default {
             'background-position': 'right center'
           },
         },
-        'float': {
+        float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' }
-        }
+        },
+        draw: {
+          '0%': { opacity: '0', 'stroke-dashoffset': '100' },
+          '100%': { opacity: '1', 'stroke-dashoffset': '0' },
+        },
+        accent: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.2)' },
+        },
+        gradient: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center',
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center',
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         'logo': 'logo-pulse 3s ease-in-out infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'document': 'document-slide 0.5s ease-out',
         'line-1': 'line-fade 0.5s ease-out 0.2s forwards',
         'line-2': 'line-fade 0.5s ease-out 0.4s forwards',
@@ -106,6 +124,10 @@ export default {
         'accent': 'accent-slide 0.5s ease-out 0.3s forwards',
         'gradient-x': 'gradient-x 15s ease infinite',
         'float': 'float 3s ease-in-out infinite',
+        'draw': 'draw 1.5s ease-in-out forwards',
+        'draw-delayed': 'draw 1.5s ease-in-out 0.3s forwards',
+        'accent': 'accent 2s ease-in-out infinite',
+        'gradient': 'gradient 8s ease infinite',
       },
       backdropBlur: {
         'md': '12px',
